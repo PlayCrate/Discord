@@ -1,5 +1,4 @@
-name: Format check
-
+name: Build Check
 on:
   push:
     branches:
@@ -48,3 +47,5 @@ jobs:
               "type": "dev"
             }
           path: "src/"
+      - name: Build
+        run: yarn build
