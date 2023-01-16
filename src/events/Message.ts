@@ -4,9 +4,10 @@ import { shortenText } from "../misc/Utils";
 import { Logger, LogLevel } from "../utility/Logger";
 import { racism, slurs } from "../utility/Regex";
 import { client_id } from "../../config.json";
+import { Events } from "discord.js";
 
 export const messages = () => {
-     client.on("interactionCreate", async (msg: any) => {
+     client.on(Events.InteractionCreate, async (msg: any) => {
           const permissions = msg.guild.members.me.permissions;
           const permissionNames = permissions.toArray();
 

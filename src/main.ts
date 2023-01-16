@@ -1,5 +1,13 @@
-import { Client, GatewayIntentBits, REST, Routes } from "discord.js";
-import { token, client_id } from "../config.json";
+import {
+     Client,
+     GatewayIntentBits,
+     REST,
+     Routes,
+     Collection,
+     CommandInteraction,
+     ButtonInteraction
+} from "discord.js";
+import { token, client_id, refresh_time } from "../config.json";
 import { loadCommands } from "./events/modules/Commands";
 
 import { login } from "./events/Login";
@@ -17,14 +25,35 @@ if (result.error) {
      process.exit(1);
 }
 
+if (refresh_time < 360000) {
+     Logger.log(
+          LogLevel.ERROR,
+          "Refresh time must be at least 360000ms (6 minutes)"
+     );
+     process.exit(1);
+}
+
+interface CustomButtonInteraction extends ButtonInteraction {
+     execute: (
+          interaction: CommandInteraction | ButtonInteraction,
+          client: CustomClient
+     ) => Promise<void>;
+}
+
+export interface CustomClient extends Client {
+     commands: Collection<string, CommandInteraction>;
+     buttons: Collection<string, CustomButtonInteraction>;
+}
+
 export const client = new Client({
      intents: [
           GatewayIntentBits.Guilds,
           GatewayIntentBits.GuildVoiceStates,
           GatewayIntentBits.GuildMessages,
-          GatewayIntentBits.MessageContent
+          GatewayIntentBits.MessageContent,
+          GatewayIntentBits.GuildMembers
      ]
-});
+}) as CustomClient;
 
 (async () => {
      login(token);
