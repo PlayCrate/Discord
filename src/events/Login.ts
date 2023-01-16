@@ -22,7 +22,8 @@ export const login = (token: string) => {
 
                categoryChannels.forEach((channel) => {
                     channel.name = channel.name.toLowerCase();
-                    if (channel.name !== "server stats") return;
+                    console.log(channel.name);
+                    if (channel.name !== "➤ server stats") return;
 
                     setInterval(async () => {
                          const FindChannelsByParentID =
@@ -36,6 +37,7 @@ export const login = (token: string) => {
                          FindChannelsByParentID.forEach((vc) => {
                               vc.name = vc.name.toLowerCase();
 
+                              console.log(`Updated in ${guild.name}!`);
                               if (vc.name.includes("playing")) {
                                    vc.setName(
                                         `Playing Now: ${playCrate?.playing.toLocaleString()}`
