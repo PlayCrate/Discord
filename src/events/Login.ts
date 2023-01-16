@@ -43,14 +43,8 @@ export const login = (token: string) => {
                                         `Playing Now: ${playCrate?.playing.toLocaleString()}`
                                    );
                               } else if (vc.name.includes("members")) {
-                                   let serverMembers = client.guilds.cache;
-                                   const findGuild = serverMembers.find(
-                                        (guild) => guilds.includes(guild.id)
-                                   );
-
-                                   vc.setName(
-                                        `Members: ${findGuild?.memberCount}`
-                                   );
+                                   let serverMembers = vc.guild.memberCount;
+                                   vc.setName(`Members: ${serverMembers}`);
                               } else if (vc.name.includes("visits")) {
                                    const format = new Intl.NumberFormat("en", {
                                         notation: "standard",
@@ -68,7 +62,7 @@ export const login = (token: string) => {
                                    vc.setName(`Fans: ${format}`);
                               }
                          });
-                    }, refresh_time);
+                    }, 5000);
                });
           });
      });
