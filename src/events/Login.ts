@@ -62,7 +62,7 @@ export const login = (token: string) => {
                                    vc.setName(`Fans: ${format}`);
                               }
                          });
-                    }, 5000);
+                    }, refresh_time);
                });
           });
      });
