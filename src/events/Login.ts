@@ -44,7 +44,9 @@ export const login = (token: string) => {
                                    );
                               } else if (vc.name.includes("members")) {
                                    let serverMembers = vc.guild.memberCount;
-                                   vc.setName(`Members: ${serverMembers}`);
+                                   vc.setName(
+                                        `Members: ${serverMembers.toLocaleString()}`
+                                   );
                               } else if (vc.name.includes("visits")) {
                                    const format = new Intl.NumberFormat("en", {
                                         notation: "standard",
