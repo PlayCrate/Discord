@@ -1,18 +1,23 @@
 import got from "got";
 
-async function makeRequest(url: string) {
-     const { body } = await got(url, {
-          method: "GET",
-          headers: {
-               "Content-Type": "application/json",
-               "User-Agent": "Roblox/WinInet",
-               "X-Requested-With": "XMLHttpRequest"
-          }
-     });
+async function makeRequest(url: string): Promise<any> {
+     try {
+          const { body } = await got(url, {
+               method: "GET",
+               headers: {
+                    "Content-Type": "application/json",
+                    "User-Agent": "Roblox/WinInet",
+                    "X-Requested-With": "XMLHttpRequest"
+               }
+          });
 
-     if (!body) return;
-     const parsed = JSON.parse(body);
-     return parsed;
+          if (!body) return;
+          const parsed = JSON.parse(body);
+          return parsed;
+     } catch (err) {
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          return makeRequest(url);
+     }
 }
 
 export const groupInfo = async (groupID: number) => {

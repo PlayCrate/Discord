@@ -33,7 +33,6 @@ export const login = (token: string) => {
 
                          const playCrate = await gameInfo(4158951932);
                          const playCrateGroup = await groupInfo(13004189);
-
                          FindChannelsByParentID.forEach((vc) => {
                               vc.name = vc.name.toLowerCase();
 
