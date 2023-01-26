@@ -1,8 +1,8 @@
 import { ActivityType, Guild } from "discord.js";
 import { client } from "../main";
 import { Logger, LogLevel } from "../utility/Logger";
-import { gameInfo, groupInfo } from "../services/roblox";
 import { guilds, refresh_time } from "../../config.json";
+import fetch from "node-fetch";
 
 export const login = (token: string) => {
      client.on("ready", async () => {
@@ -31,15 +31,20 @@ export const login = (token: string) => {
                                    (parent) => parent.parentId === channel.id
                               );
 
-                         const playCrate = await gameInfo(4158951932);
-                         const playCrateGroup = await groupInfo(13004189);
+                         const {
+                              play_crate_fans: fans,
+                              play_crate_playing: playing,
+                              play_crate_visits: visits
+                         } = await fetch(`https://roblox.kattah.me/rtc`, {
+                              method: "GET"
+                         }).then((res) => res.json());
                          FindChannelsByParentID.forEach((vc) => {
                               vc.name = vc.name.toLowerCase();
 
                               console.log(`Updated in ${guild.name}!`);
                               if (vc.name.includes("playing")) {
                                    vc.setName(
-                                        `Playing Now: ${playCrate?.playing.toLocaleString()}`
+                                        `Playing Now: ${playing.toLocaleString()}`
                                    );
                               } else if (vc.name.includes("members")) {
                                    let serverMembers = vc.guild.memberCount;
@@ -50,7 +55,7 @@ export const login = (token: string) => {
                                    const format = new Intl.NumberFormat("en", {
                                         notation: "standard",
                                         compactDisplay: "short"
-                                   }).format(playCrate?.visits);
+                                   }).format(visits);
 
                                    vc.setName(`Visits: ${format}`);
                               } else if (vc.name.includes("fans")) {
@@ -58,12 +63,12 @@ export const login = (token: string) => {
                                         notation: "compact",
                                         compactDisplay: "short",
                                         maximumFractionDigits: 2
-                                   }).format(playCrateGroup?.memberCount);
+                                   }).format(fans);
 
                                    vc.setName(`Fans: ${format}`);
                               }
                          });
-                    }, refresh_time);
+                    }, 2000);
                });
           });
      });
