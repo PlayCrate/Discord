@@ -1,7 +1,7 @@
 {
-  "name": "dontaddthisbot-discord",
+  "name": "playcrate-discord",
   "version": "1.0.0",
-  "description": "DontAddThisBot For Discord",
+  "description": "PlayCrate Discord Bot",
   "main": "build/src/main.js",
   "author": "Kattah",
   "license": "MIT",
