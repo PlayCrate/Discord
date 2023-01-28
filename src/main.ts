@@ -1,20 +1,19 @@
 import {
      Client,
      GatewayIntentBits,
-     REST,
-     Routes,
      Collection,
      CommandInteraction,
      ButtonInteraction
 } from "discord.js";
-import { token, client_id, refresh_time } from "../config.json";
-import { loadCommands } from "./events/modules/Commands";
+import { token, refresh_time } from "../config.json";
 
 import { login } from "./events/Login";
 import { messages } from "./events/Message";
 
 import { LogLevel, Logger } from "./utility/Logger";
 import { ConfigSchema } from "./validators/ConfigSchema";
+import importInteractions from "./import-int";
+import TaskManager from "./manager/TaskManager";
 
 const result = ConfigSchema.validate(require("../config.json"));
 if (result.error) {
@@ -41,45 +40,33 @@ interface CustomButtonInteraction extends ButtonInteraction {
 }
 
 export interface CustomClient extends Client {
+     tasks: TaskManager;
      commands: Collection<string, CommandInteraction>;
      buttons: Collection<string, CustomButtonInteraction>;
 }
 
-export const client = new Client({
-     intents: [
-          GatewayIntentBits.Guilds,
-          GatewayIntentBits.GuildVoiceStates,
-          GatewayIntentBits.GuildMessages,
-          GatewayIntentBits.MessageContent,
-          GatewayIntentBits.GuildMembers
-     ]
-}) as CustomClient;
+const buildClient = (): CustomClient => {
+     const client = new Client({
+          intents: [
+               GatewayIntentBits.Guilds,
+               GatewayIntentBits.GuildVoiceStates,
+               GatewayIntentBits.GuildMessages,
+               GatewayIntentBits.MessageContent,
+               GatewayIntentBits.GuildMembers
+          ]
+     }) as CustomClient;
+
+     client.tasks = new TaskManager();
+     client.commands = new Collection();
+     client.buttons = new Collection();
+
+     return client;
+};
+
+export const client = buildClient();
 
 (async () => {
      login(token);
      messages();
-     const commandsMapped = loadCommands();
-     const commands = [...commandsMapped.commands.values()];
-
-     const rest = new REST({ version: "10" }).setToken(token);
-     try {
-          Logger.log(
-               LogLevel.DEBUG,
-               "Started refreshing application (/) commands."
-          );
-
-          await rest.put(Routes.applicationCommands(client_id), {
-               body: commands
-          });
-
-          Logger.log(
-               LogLevel.INFO,
-               "Successfully reloaded application (/) commands."
-          );
-     } catch (error) {
-          Logger.log(
-               LogLevel.ERROR,
-               `Error while reloading application (/) commands: ${error}`
-          );
-     }
+     importInteractions(client);
 })();

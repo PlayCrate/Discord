@@ -5,5 +5,7 @@ export const ConfigSchema = Joi.object({
      client_id: Joi.string().required(),
      type: Joi.string().required(),
      guilds: Joi.array().items(Joi.string()).required(),
-     refresh_time: Joi.number().required()
+     refresh_time: Joi.number().required(),
+     authorization: Joi.string().required(),
+     adminChannels: Joi.array().items(Joi.string()).required()
 });

@@ -1,12 +1,15 @@
-export = {
-     name: "ping",
-     cooldown: 5000,
-     permission: [],
-     description: "Response of the PlayCrate! Bot",
-     execute: async (client: any, msg: any) => {
-          return {
-               text: `Pong!`,
-               ephemeral: false
-          };
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { CustomClient } from "../main";
+import { FeedbackManager } from "../manager/FeedbackManager";
+
+const test = {
+     data: new SlashCommandBuilder()
+          .setName("ping")
+          .setDescription("Bot response command"),
+     async execute(interaction: CommandInteraction, client: CustomClient) {
+          const feedback = new FeedbackManager(interaction);
+          await feedback.gotRequest();
      }
 };
+
+export default test;

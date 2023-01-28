@@ -1,65 +1,111 @@
-import { loadCommands } from "./Commands";
-import { client } from "../../main";
-import Cooldown from "./Cooldown";
 import { Logger, LogLevel } from "../../utility/Logger";
+import { Interaction } from "discord.js";
+import { CustomClient } from "../../main";
+import { errorEmbed } from "../../embeds/error";
+import { FeedbackManager } from "../../manager/FeedbackManager";
 
-const cooldown = new Cooldown();
-const { commands } = loadCommands();
+export const handler = async (
+     interaction: Interaction,
+     client: CustomClient
+) => {
+     if (interaction.isCommand()) {
+          console.log(
+               `New command: user: ${interaction.user.username}, guild: ${interaction.guild?.name}, command: ${interaction.commandName}`
+          );
 
-export const handler = async (msg: any): Promise<void> => {
-     if (msg) {
-          const cooldownKey = `${msg.data.commandName}-${msg.data.user.id}`;
-          if (cooldown.has(cooldownKey))
-               return await msg.send(
-                    `Please wait... You are on cooldown!`,
-                    true
-               );
-
-          let command = commands.get(msg.data.commandName);
+          const command = client.commands.get(interaction.commandName) as any;
           if (!command) return;
+          if (command?.permissions) {
+               const userPermissions = interaction.memberPermissions;
+               if (!userPermissions?.has(command.permissions)) {
+                    const error = errorEmbed(
+                         `You are not allowed to execute this command! \nYou need the following permissions: \`${command.permissions}\``
+                    );
+                    interaction.reply({
+                         embeds: [error],
+                         ephemeral: true,
+                         files: []
+                    });
+                    return;
+               }
+          }
 
-          if (command) {
+          if (command?.channels) {
+               const channel = interaction.channelId;
+               if (!command.channels.includes(channel)) {
+                    const error = errorEmbed(
+                         `You are not allowed to execute this command in this channel!`
+                    );
+                    interaction.reply({
+                         embeds: [error],
+                         ephemeral: true,
+                         files: []
+                    });
+                    return;
+               }
+          }
+
+          try {
+               await command.execute(interaction, client);
+          } catch (error) {
+               Logger.log(
+                    LogLevel.ERROR,
+                    `Error while executing command: ${error}`
+               );
+               await interaction.reply({
+                    content: `An error occurred while executing this command! \`${error}\``,
+                    ephemeral: true
+               });
+          }
+     }
+
+     const isButtonInteraction = interaction.isButton();
+     const isSelectMenuInteraction = interaction.isSelectMenu();
+     if (isButtonInteraction || isSelectMenuInteraction) {
+          const feedback = new FeedbackManager(interaction);
+          if (
+               !(
+                    interaction.user.id ===
+                    interaction.message.interaction!.user.id
+               )
+          ) {
+               const error = errorEmbed(
+                    "You are not allowed **YET** to use another users interactions!"
+               );
+               interaction.reply({
+                    embeds: [error],
+                    ephemeral: true,
+                    files: []
+               });
+               return;
+          }
+
+          const interactionTaskId = interaction.customId.split(":")[0];
+          let taskDetails;
+
+          if (interactionTaskId === "cancelAction") {
+               taskDetails = {
+                    action: "cancelAction"
+               };
+          } else {
+               taskDetails = client.tasks.getTask(interactionTaskId);
+          }
+
+          if (!taskDetails) {
+               await feedback.removeButtons();
+               return;
+          }
+
+          if (isButtonInteraction) {
+               const buttonInteraction = client.buttons.get(taskDetails.action);
+               if (!buttonInteraction) return;
+
                try {
-                    if (command?.permission) {
-                         const memberPerms =
-                              msg.data.memberPermissions.toArray();
-                         for (const perm of command.permission) {
-                              if (!memberPerms.includes(perm)) {
-                                   return await msg.send(
-                                        `You don't have the permission to use this command! Missing permission: \`${perm}\``,
-                                        true
-                                   );
-                              }
-                         }
-                    }
-
-                    if (command.cooldown) {
-                         cooldown.set(cooldownKey, command.cooldown);
-                    }
-
-                    const response = await command.execute(client, msg);
-
-                    if (response) {
-                         if (response.error) {
-                              setTimeout(() => {
-                                   cooldown.delete(cooldownKey);
-                              }, 2000);
-                         } else if (response.text) {
-                              await msg.send(
-                                   response.text.replace(/\n|\r/g, " "),
-                                   response.ephemeral
-                              );
-                         }
-                    }
+                    await buttonInteraction.execute(interaction, client);
                } catch (error) {
                     Logger.log(
                          LogLevel.ERROR,
-                         `Error while executing command: ${error}`
-                    );
-
-                    await msg.send(
-                         `An error occurred while executing this command! \`${error}\``,
-                         true
+                         `Error while executing button: ${error}`
                     );
                }
           }

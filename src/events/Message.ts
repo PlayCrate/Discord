@@ -1,8 +1,5 @@
 import { client } from "../main";
 import { handler } from "./modules/Handler";
-import { shortenText } from "../misc/Utils";
-import { Logger, LogLevel } from "../utility/Logger";
-import { racism, slurs } from "../utility/Regex";
 import { client_id } from "../../config.json";
 import { Events } from "discord.js";
 
@@ -25,36 +22,17 @@ export const messages = () => {
                return;
           }
 
-          if (msg.commandName) {
-               const msgHadnler = {
-                    data: msg,
-                    send: async (response: string, ephemeral: Boolean) => {
-                         response = shortenText(response, 1950);
+          if (!msg.inGuild() && msg.isRepliable()) {
+               msg.reply("Not supported yet.");
+          }
 
-                         if (racism.test(response) || slurs.test(response)) {
-                              Logger.log(
-                                   LogLevel.WARN,
-                                   `This message violates the Discord Terms of Service.`
-                              );
-                              return;
-                         }
+          const isCommand = msg.isCommand();
+          const isButton = msg.isButton();
+          const isSelectMenu = msg.isSelectMenu();
 
-                         try {
-                              await msg.reply(
-                                   ephemeral
-                                        ? { content: response, ephemeral: true }
-                                        : response
-                              );
-                         } catch (error) {
-                              Logger.log(
-                                   LogLevel.ERROR,
-                                   `Error while sending message: ${error}`
-                              );
-                         }
-                    }
-               };
-
-               handler(msgHadnler);
+          const supportedInteraction = isCommand || isButton || isSelectMenu;
+          if (supportedInteraction) {
+               return handler(msg, client);
           }
      });
 };
