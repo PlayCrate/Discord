@@ -44,12 +44,12 @@ export const login = (token: string) => {
                               console.log(`Updated in ${guild.name}!`);
                               if (vc.name.includes("playing")) {
                                    vc.setName(
-                                        `Playing Now: ${playing.toLocaleString()}`
+                                        `🎮┃Playing: ${playing.toLocaleString()}`
                                    );
                               } else if (vc.name.includes("members")) {
                                    let serverMembers = vc.guild.memberCount;
                                    vc.setName(
-                                        `Members: ${serverMembers.toLocaleString()}`
+                                        `👤┃Members: ${serverMembers.toLocaleString()}`
                                    );
                               } else if (vc.name.includes("visits")) {
                                    const format = new Intl.NumberFormat("en", {
@@ -57,7 +57,7 @@ export const login = (token: string) => {
                                         compactDisplay: "short"
                                    }).format(visits);
 
-                                   vc.setName(`Visits: ${format}`);
+                                   vc.setName(`🚀┃Visits: ${format}`);
                               } else if (vc.name.includes("fans")) {
                                    const format = new Intl.NumberFormat("en", {
                                         notation: "compact",
@@ -65,7 +65,7 @@ export const login = (token: string) => {
                                         maximumFractionDigits: 2
                                    }).format(fans);
 
-                                   vc.setName(`Fans: ${format}`);
+                                   vc.setName(`👥┃Fans: ${format}`);
                               }
                          });
                     }, refresh_time);
