@@ -48,6 +48,7 @@ export const login = (token: string) => {
                                    );
                               } else if (vc.name.includes("members")) {
                                    let serverMembers = vc.guild.memberCount;
+                                   console.log(serverMembers);
                                    vc.setName(
                                         `👤┃Members: ${serverMembers.toLocaleString()}`
                                    );
