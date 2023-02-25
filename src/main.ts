@@ -24,13 +24,13 @@ if (result.error) {
      process.exit(1);
 }
 
-if (refresh_time < 360000) {
-     Logger.log(
-          LogLevel.ERROR,
-          "Refresh time must be at least 360000ms (6 minutes)"
-     );
-     process.exit(1);
-}
+// if (refresh_time < 360000) {
+//      Logger.log(
+//           LogLevel.ERROR,
+//           "Refresh time must be at least 360000ms (6 minutes)"
+//      );
+//      process.exit(1);
+// }
 
 interface CustomButtonInteraction extends ButtonInteraction {
      execute: (
