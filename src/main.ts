@@ -5,7 +5,7 @@ import {
      CommandInteraction,
      ButtonInteraction
 } from "discord.js";
-import { token, refresh_time } from "../config.json";
+import { token } from "../config.json";
 
 import { login } from "./events/Login";
 import { messages } from "./events/Message";
@@ -23,14 +23,6 @@ if (result.error) {
      );
      process.exit(1);
 }
-
-// if (refresh_time < 360000) {
-//      Logger.log(
-//           LogLevel.ERROR,
-//           "Refresh time must be at least 360000ms (6 minutes)"
-//      );
-//      process.exit(1);
-// }
 
 interface CustomButtonInteraction extends ButtonInteraction {
      execute: (

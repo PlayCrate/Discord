@@ -1,8 +1,9 @@
 import { ActivityType, Guild } from "discord.js";
 import { client } from "../main";
 import { Logger, LogLevel } from "../utility/Logger";
-import { guilds, refresh_time } from "../../config.json";
+import { guilds } from "../../config.json";
 import fetch from "node-fetch";
+import cron from "node-cron";
 
 export const login = (token: string) => {
      client.on("ready", async () => {
@@ -25,7 +26,7 @@ export const login = (token: string) => {
                     console.log(channel.name);
                     if (channel.name !== "➤ server stats") return;
 
-                    setInterval(async () => {
+                    cron.schedule(`*/6 * * * *`, async () => {
                          const FindChannelsByParentID =
                               guild.channels.cache.filter(
                                    (parent) => parent.parentId === channel.id
@@ -35,9 +36,12 @@ export const login = (token: string) => {
                               play_crate_fans: fans,
                               play_crate_playing: playing,
                               play_crate_visits: visits
-                         } = await fetch(`https://roblox.kattah.me/rtc`, {
-                              method: "GET"
-                         }).then((res) => res.json());
+                         } = await fetch(
+                              `https://playcrate-stats.kattah.me/rtc`,
+                              {
+                                   method: "GET"
+                              }
+                         ).then((res) => res.json());
                          FindChannelsByParentID.forEach((vc) => {
                               vc.name = vc.name.toLowerCase();
 
@@ -48,7 +52,6 @@ export const login = (token: string) => {
                                    );
                               } else if (vc.name.includes("members")) {
                                    let serverMembers = vc.guild.memberCount;
-                                   console.log(serverMembers);
                                    vc.setName(
                                         `👤┃Members: ${serverMembers.toLocaleString()}`
                                    );
@@ -69,7 +72,7 @@ export const login = (token: string) => {
                                    vc.setName(`👥┃Fans: ${format}`);
                               }
                          });
-                    }, refresh_time);
+                    });
                });
           });
      });
