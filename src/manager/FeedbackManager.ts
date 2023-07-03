@@ -101,7 +101,7 @@ export class FeedbackManager {
 
      async info(title: string, message: string, thumbnail?: string) {
           const embed = infoEmbed(title, message, thumbnail);
-          await this.sendMessage({ embeds: [embed] });
+          await this.sendMessage({ embeds: [embed] }, true);
      }
 
      async gotRequest() {
